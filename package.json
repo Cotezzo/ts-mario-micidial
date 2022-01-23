@@ -27,5 +27,9 @@
     "libsodium-wrappers": "^0.7.9",
     "opusscript": "^0.0.8",
     "uuid": "^8.3.2"
+  },
+  "engines": {
+    "node": "16.6",
+    "npm": "8.2.0"
   }
 }
