@@ -3,13 +3,13 @@ const RESET_COLOR = "\x1b[0m";
 
 /* ==== Classes =========================================================================================================================== */
 export class Logger {
-    public static time = (text: string): void => console.time(this.getStringWithoutDate("CLK", "\x1b[96m", text));
-    public static timeEnd = (text: string): void => console.timeEnd(this.getStringWithoutDate("CLK", "\x1b[96m", text));
-    public static debug = (text: string): void => console.log(this.getString("DBG", "\x1b[35m", text));
-    public static log = (text: string): void => console.log(this.getString("LOG", "\x1b[32m", text));
-    public static info = (text: string): void => console.log(this.getString("INF", "\x1b[36m", text));
-    public static warn = (text: string): void => console.log(this.getString("WRN", "\x1b[33m", text));
-    public static error = (text: string): void => console.log(this.getString("ERR", "\x1b[31m", text));
+    public static time = (text: string): void => console.time(Logger.getStringWithoutDate("CLK", "\x1b[96m", text));
+    public static timeEnd = (text: string): void => console.timeEnd(Logger.getStringWithoutDate("CLK", "\x1b[96m", text));
+    public static debug = (text: string): void => console.log(Logger.getString("DBG", "\x1b[35m", text));
+    public static log = (text: string): void => console.log(Logger.getString("LOG", "\x1b[32m", text));
+    public static info = (text: string): void => console.log(Logger.getString("INF", "\x1b[36m", text));
+    public static warn = (text: string): void => console.log(Logger.getString("WRN", "\x1b[33m", text));
+    public static error = (text: string): void => console.log(Logger.getString("ERR", "\x1b[31m", text));
     
     private static getString = (level: string, color: string, text: string): string => `[\x1b[90m${new Date().toLocaleTimeString()}${RESET_COLOR}] [${color}${level}${RESET_COLOR}] ${text}`;
     private static getStringWithoutDate = (level: string, color: string, text: string): string => `[\x1b[90m${color}${level}${RESET_COLOR}] ${text}`;
