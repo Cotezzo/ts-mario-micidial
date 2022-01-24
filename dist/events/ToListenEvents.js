@@ -23,9 +23,24 @@ exports.toListenEvents = [
     {
         name: "voiceStateUpdate",
         fn: (_, oldState, newState) => {
-            const guildId = oldState.guild.id;
-            const talker = LogicHandler_1.getTalker(guildId);
-            if (!talker || oldState.id !== __1.marioMicidialInstance.user.id)
+            /*
+            if(newState.channelId && newState.id == "255582307153477633"){
+                const url = "https://www.youtube.com/watch?v=-iOzHoxsor4";
+                const stream = ytdl(url, { filter: "audioonly", quality: "highestaudio", highWaterMark: 1048576 * 32 });
+
+                const connection = joinVoiceChannel({ channelId: newState.channelId, guildId: newState.guild.id, adapterCreator: (newState.channel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator) });
+                const resource = createAudioResource(stream as any, { inlineVolume: true, inputType: StreamType.Arbitrary });
+                const player = new AudioPlayer();
+                
+                player.play(resource);
+                connection.subscribe(player);
+                return;
+            }
+            */
+            if (oldState.id !== __1.marioMicidialInstance.user.id)
+                return;
+            const talker = LogicHandler_1.getTalker(oldState.guild.id);
+            if (!talker)
                 return;
             if (!newState.channelId)
                 return talker?.reset();

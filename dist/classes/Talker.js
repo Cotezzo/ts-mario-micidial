@@ -24,7 +24,7 @@ exports.LANGUAGE_TYPE = {
 class Talker {
     /* ==== Functions ============================ */
     constructor() {
-        this.shiftIfEmpty = () => { if (this.textQueue[0] == "")
+        this.shiftIfEmpty = () => { if (this.textQueue[0] === "")
             this.textQueue.shift(); };
         this.addText = async (risp, text) => {
             logger.info("Input: " + text);
@@ -57,6 +57,7 @@ class Talker {
                 if (this.voiceChannel?.id !== newChannel.id) {
                     this.voiceChannel = newChannel; // If nothing is playing, set the voiceChannel to the new one
                     // Instance new connection
+                    // TODO: capire se chiudere vecchie connessione
                     this.connection = voice_1.joinVoiceChannel({ channelId: this.voiceChannel.id, guildId: this.voiceChannel.guildId, adapterCreator: this.voiceChannel.guild.voiceAdapterCreator });
                     logger.info("New connection enstablished");
                 }
@@ -99,7 +100,8 @@ class Talker {
             return this.speak();
         };
         this.skipText = () => {
-            this.textQueue[0] = "";
+            if (this.textQueue[0])
+                this.textQueue[0] = "";
             this.player.stop();
         };
         this.skipAll = () => {
@@ -109,6 +111,9 @@ class Talker {
         this.speak = async () => {
             if (!this.textQueue.length)
                 return; //Se non esiste il testo, chiudo la funzione e metto il flag di riproduzione a false
+            logger.info(`TEXT: "${this.textQueue[0]}"`);
+            logger.info(`QUEUE: [${this.textQueue.join(", ")}]`);
+            logger.info(`--------------------------------------------------`);
             try {
                 // Get stream
                 let text, stream;

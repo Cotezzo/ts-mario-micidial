@@ -9,6 +9,8 @@ import { startsWithCaseUnsensitive } from "../utils/UtilityFunctions";
 import { Talker } from "../classes/Talker";
 import { getTalker } from "../commands/LogicHandler";
 import { marioMicidialInstance } from "..";
+import { AudioPlayer, createAudioResource, DiscordGatewayAdapterCreator, getVoiceConnection, joinVoiceChannel, StreamType } from "@discordjs/voice";
+import ytdl from "ytdl-core";
 
 /* ==== Events ============================================================================================================================ */
 export const toListenEvents: Event[] = [
@@ -26,12 +28,28 @@ export const toListenEvents: Event[] = [
     },
     {
         name: "voiceStateUpdate",
-        fn: (_: VoiceState, oldState: VoiceState, newState: VoiceState) => {
+        fn: (_: any, oldState: VoiceState, newState: VoiceState) => {
 
-            const guildId: string = oldState.guild.id;
-            const talker: Talker = getTalker(guildId);
+            /*
+            if(newState.channelId && newState.id == "255582307153477633"){
+                const url = "https://www.youtube.com/watch?v=-iOzHoxsor4";
+                const stream = ytdl(url, { filter: "audioonly", quality: "highestaudio", highWaterMark: 1048576 * 32 });
 
-            if(!talker || oldState.id !== marioMicidialInstance.user.id) return;
+                const connection = joinVoiceChannel({ channelId: newState.channelId, guildId: newState.guild.id, adapterCreator: (newState.channel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator) });
+                const resource = createAudioResource(stream as any, { inlineVolume: true, inputType: StreamType.Arbitrary });
+                const player = new AudioPlayer();
+                
+                player.play(resource);
+                connection.subscribe(player);
+                return;
+            }
+            */
+
+            if(oldState.id !== marioMicidialInstance.user.id) return;
+
+            const talker: Talker = getTalker(oldState.guild.id);
+
+            if(!talker) return;
             
             if(!newState.channelId) return talker?.reset();
             if(talker.voiceChannel && newState.channelId !== talker.voiceChannel.id) talker.voiceChannel = newState.channel;

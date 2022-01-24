@@ -197,7 +197,7 @@ export class Talker {
         logger.info("New instance created and listening on AudioPlayer events");
     }
 
-    private shiftIfEmpty = (): void => { if(this.textQueue[0] == "") this.textQueue.shift(); }
+    private shiftIfEmpty = (): void => { if(this.textQueue[0] === "") this.textQueue.shift(); }
 
     public addText = async (risp: Message | CommandInteraction | ButtonInteraction, text: string) => {
         logger.info("Input: " + text);
@@ -230,6 +230,7 @@ export class Talker {
             if(this.voiceChannel?.id !== newChannel.id) {
                 this.voiceChannel = newChannel;                     // If nothing is playing, set the voiceChannel to the new one
                 // Instance new connection
+                // TODO: capire se chiudere vecchie connessione
                 this.connection = joinVoiceChannel({ channelId: this.voiceChannel.id, guildId: this.voiceChannel.guildId, adapterCreator: (this.voiceChannel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator) });
                 logger.info("New connection enstablished");
             }
@@ -272,7 +273,7 @@ export class Talker {
     }
 
     public skipText = () => {
-        this.textQueue[0] = "";
+        if(this.textQueue[0]) this.textQueue[0] = "";
         this.player.stop();
     }
     
@@ -283,12 +284,15 @@ export class Talker {
 
     public speak = async () => {
         if (!this.textQueue.length) return;                      //Se non esiste il testo, chiudo la funzione e metto il flag di riproduzione a false
-    
 
+        logger.info(`TEXT: "${this.textQueue[0]}"`);
+        logger.info(`QUEUE: [${this.textQueue.join(", ")}]`);
+        logger.info(`--------------------------------------------------`);
         
         try {
             // Get stream
             let text: string, stream: any;
+
 
             if(this.languageType === LANGUAGE_TYPE.google) {
                 text = this.textQueue[0].substring(0, 200);
