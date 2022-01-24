@@ -30,19 +30,8 @@ class Talker {
             logger.info("Input: " + text);
             if (!text)
                 return; // Se non c'è effettivamente roba da aggiungere, torna
-            // this.textQueue.push(...text.match(/.{1,200}/g));                                // Altrimenti inseriscile in coda in blocchi da 200
             this.textQueue.push(text);
             this.tryToPlay(risp);
-            // if (!serverTexts.connection) {                                                  // Se non è presente una connessione
-            //     if (!msg.member.voice.channel) return serverTexts.texts = [];
-            //     serverTexts.connection = await serverTexts.voiceChannel.join().catch(err => {msg.channel.send(`An error occurred: "**${err.message}**"`); return null});             //Entra nel canale vocale
-            //     if(!serverTexts.connection) return serverTexts.texts = [];                  //Se connection è null (errore durante entrata canale)
-            //     serverTexts.speaking = true;
-            //     speak();                                                         //Ed inizia la riproduzione
-            // } else if (!serverTexts.speaking) {                                             //O se non sta parlando
-            //     serverTexts.speaking = true;
-            //     speak();
-            // }
         };
         this.tryToPlay = (risp) => {
             if (this.isPlaying())
@@ -113,7 +102,8 @@ class Talker {
                 return; //Se non esiste il testo, chiudo la funzione e metto il flag di riproduzione a false
             logger.info(`TEXT: "${this.textQueue[0]}"`);
             logger.info(`QUEUE: [${this.textQueue.join(", ")}]`);
-            logger.info(`--------------------------------------------------`);
+            if (this.textQueue[0] === "")
+                return logger.warn("Found empty string!");
             try {
                 // Get stream
                 let text, stream;
