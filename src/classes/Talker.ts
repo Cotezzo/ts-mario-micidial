@@ -275,8 +275,10 @@ export class Talker {
 
         logger.info(`TEXT: "${this.textQueue[0]}"`);
         logger.info(`QUEUE: [${this.textQueue.join(", ")}]`);
-        if(this.textQueue[0] === "") return logger.warn("Found empty string!");
-
+        if(this.textQueue[0] === "") {
+            logger.warn("Found empty string!");
+            return this.textQueue.shift();
+        }
 
         try {
             // Get stream

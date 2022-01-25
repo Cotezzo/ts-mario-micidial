@@ -102,8 +102,10 @@ class Talker {
                 return; //Se non esiste il testo, chiudo la funzione e metto il flag di riproduzione a false
             logger.info(`TEXT: "${this.textQueue[0]}"`);
             logger.info(`QUEUE: [${this.textQueue.join(", ")}]`);
-            if (this.textQueue[0] === "")
+            if (this.textQueue[0] === "") {
+                this.textQueue.shift();
                 return logger.warn("Found empty string!");
+            }
             try {
                 // Get stream
                 let text, stream;
