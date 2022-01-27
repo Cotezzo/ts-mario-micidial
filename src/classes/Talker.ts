@@ -271,7 +271,7 @@ export class Talker {
         if (!this.textQueue.length) return;                      //Se non esiste il testo, chiudo la funzione e metto il flag di riproduzione a false
 
         logger.info(`QUEUE: [${this.textQueue.join(", ")}]`);
-        if(this.textQueue[0] === "") {
+        if(this.textQueue[0].length === 0) {
             logger.warn("Removing empty string...");
             this.textQueue.shift();
             return this.speak();
@@ -285,6 +285,9 @@ export class Talker {
             if(this.languageType === LANGUAGE_TYPE.google) {
                 text = this.textQueue[0].substring(0, 200);
                 this.textQueue[0] = this.textQueue[0].substring(200);
+
+                logger.warn(text);
+                logger.warn(this.textQueue[0])
 
                 const audioURL = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text.toLowerCase())}&tl=${this.language}&client=tw-ob&ttsspeed=${this.ttsSpeed}`;
                 stream = await axios.get(audioURL, { responseType: 'stream' }).then(resp => resp.data);
