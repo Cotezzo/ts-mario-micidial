@@ -277,7 +277,8 @@ export class Talker {
         logger.info(`QUEUE: [${this.textQueue.join(", ")}]`);
         if(this.textQueue[0] === "") {
             logger.warn("Found empty string!");
-            return this.textQueue.shift();
+            this.textQueue.shift();
+            return this.speak();
         }
 
         try {

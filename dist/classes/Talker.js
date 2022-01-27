@@ -103,8 +103,9 @@ class Talker {
             logger.info(`TEXT: "${this.textQueue[0]}"`);
             logger.info(`QUEUE: [${this.textQueue.join(", ")}]`);
             if (this.textQueue[0] === "") {
+                logger.warn("Found empty string!");
                 this.textQueue.shift();
-                return logger.warn("Found empty string!");
+                return this.speak();
             }
             try {
                 // Get stream
