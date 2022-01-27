@@ -5,31 +5,33 @@ exports.ClassLogger = exports.Logger = void 0;
 const RESET_COLOR = "\x1b[0m";
 /* ==== Classes =========================================================================================================================== */
 class Logger {
+    static time = (text) => console.time(Logger.getStringWithoutDate("CLK", "\x1b[96m", text));
+    static timeEnd = (text) => console.timeEnd(Logger.getStringWithoutDate("CLK", "\x1b[96m", text));
+    static debug = (text) => console.log(Logger.getString("DBG", "\x1b[35m", text));
+    static log = (text) => console.log(Logger.getString("LOG", "\x1b[32m", text));
+    static info = (text) => console.log(Logger.getString("INF", "\x1b[36m", text));
+    static warn = (text) => console.log(Logger.getString("WRN", "\x1b[33m", text));
+    static error = (text) => console.log(Logger.getString("ERR", "\x1b[31m", text));
+    static getString = (level, color, text) => `[\x1b[90m${new Date().toLocaleTimeString()}${RESET_COLOR}] [${color}${level}${RESET_COLOR}] ${text}`;
+    static getStringWithoutDate = (level, color, text) => `[\x1b[90m${color}${level}${RESET_COLOR}] ${text}`;
 }
 exports.Logger = Logger;
-Logger.time = (text) => console.time(Logger.getStringWithoutDate("CLK", "\x1b[96m", text));
-Logger.timeEnd = (text) => console.timeEnd(Logger.getStringWithoutDate("CLK", "\x1b[96m", text));
-Logger.debug = (text) => console.log(Logger.getString("DBG", "\x1b[35m", text));
-Logger.log = (text) => console.log(Logger.getString("LOG", "\x1b[32m", text));
-Logger.info = (text) => console.log(Logger.getString("INF", "\x1b[36m", text));
-Logger.warn = (text) => console.log(Logger.getString("WRN", "\x1b[33m", text));
-Logger.error = (text) => console.log(Logger.getString("ERR", "\x1b[31m", text));
-Logger.getString = (level, color, text) => `[\x1b[90m${new Date().toLocaleTimeString()}${RESET_COLOR}] [${color}${level}${RESET_COLOR}] ${text}`;
-Logger.getStringWithoutDate = (level, color, text) => `[\x1b[90m${color}${level}${RESET_COLOR}] ${text}`;
 class ClassLogger {
+    className;
+    isProd;
     constructor(className) {
-        this.a = () => `[\x1b[1m${this.className}${RESET_COLOR}] `;
-        this.debug = (text) => { if (this.isProd)
-            Logger.debug(this.a() + text); };
-        this.log = (text) => Logger.log(this.a() + text);
-        this.info = (text) => Logger.info(this.a() + text);
-        this.warn = (text) => Logger.warn(this.a() + text);
-        this.error = (text) => Logger.error(this.a() + text);
-        this.time = (text) => Logger.time(this.a() + text);
-        this.timeEnd = (text) => Logger.timeEnd(this.a() + text);
         this.className = className;
         this.isProd = process.env.ENVIROMENT === "P";
     }
+    a = () => `[\x1b[1m${this.className}${RESET_COLOR}] `;
+    debug = (text) => { if (this.isProd)
+        Logger.debug(this.a() + text); };
+    log = (text) => Logger.log(this.a() + text);
+    info = (text) => Logger.info(this.a() + text);
+    warn = (text) => Logger.warn(this.a() + text);
+    error = (text) => Logger.error(this.a() + text);
+    time = (text) => Logger.time(this.a() + text);
+    timeEnd = (text) => Logger.timeEnd(this.a() + text);
 }
 exports.ClassLogger = ClassLogger;
 /*

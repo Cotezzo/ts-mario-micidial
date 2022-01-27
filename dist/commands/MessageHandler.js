@@ -33,5 +33,5 @@ const commandHandlerMap = {
     "j, join, l, leave, v, volume, s, skip, sa, ss, skipall, lang, language, voice, ibm, delete, say": (msg, cmd, ...args) => cmd.fn(msg, args)
 };
 /* ==== Post Processing =================================================================================================================== */
-applyAlias_1.applyAlias(commandHandlerMap);
+(0, applyAlias_1.applyAlias)(commandHandlerMap);
 //# sourceMappingURL=MessageHandler.js.map

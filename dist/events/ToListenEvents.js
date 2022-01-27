@@ -14,10 +14,10 @@ exports.toListenEvents = [
                 return msg.react("🖕🏿").catch(() => { });
             if (msg.author.bot)
                 return; // Bot message: reject
-            if (!UtilityFunctions_1.startsWithCaseUnsensitive(msg.content, process.env.PREFIX) /* && !startsWithCaseUnsensitive(msg.content, "%")*/)
+            if (!(0, UtilityFunctions_1.startsWithCaseUnsensitive)(msg.content, process.env.PREFIX) /* && !startsWithCaseUnsensitive(msg.content, "%")*/)
                 return; // No prefix: reject - Remove prefix from msg.content
             msg.content = msg.content.substring(process.env.PREFIX.length + (msg.content.charAt(process.env.PREFIX.length) == " " ? 1 : 0));
-            MessageHandler_1.MessageHandler(msg); // Handle command and output
+            (0, MessageHandler_1.MessageHandler)(msg); // Handle command and output
         }
     },
     {
@@ -39,7 +39,7 @@ exports.toListenEvents = [
             */
             if (oldState.id !== __1.marioMicidialInstance.user.id)
                 return;
-            const talker = LogicHandler_1.getTalker(oldState.guild.id);
+            const talker = (0, LogicHandler_1.getTalker)(oldState.guild.id);
             if (!talker)
                 return;
             if (!newState.channelId)

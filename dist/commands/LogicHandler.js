@@ -22,7 +22,7 @@ const logicHandler = {
     info: {
         name: "info", category: "Information", description: "Lets the bot speak a bit about himself",
         fn: (guildId) => {
-            const talker = exports.getTalker(guildId);
+            const talker = (0, exports.getTalker)(guildId);
             return { embeds: [new discord_js_1.MessageEmbed()
                         .setColor(process.env.EMBED_COLOR)
                         .setTitle("Mario Micidial informations")
@@ -62,23 +62,23 @@ const logicHandler = {
     },
     "l, leave, clear, stop, fanculo": {
         name: "leave", category: "Talk", description: "Kicks the bot out from the voice channel, but doesn't clear the current queue and other informations.", aliases: "l",
-        fn: (risp) => exports.getTalker(risp.guildId)?.reset()
+        fn: (risp) => (0, exports.getTalker)(risp.guildId)?.reset()
     },
     "v, volume": {
         name: "volume", category: "Talk", description: "Changes the volume of the radio [Default: 1].", aliases: "v",
         fn: (risp, volume) => {
             if (!/[0-9]{0,2}(\.[0-9])?/.test(volume))
                 return;
-            exports.getTalker(risp.guildId)?.setVolume(parseFloat(volume));
+            (0, exports.getTalker)(risp.guildId)?.setVolume(parseFloat(volume));
         }
     },
     "s, skip": {
         name: "skip", category: "Talk", description: "Skips the current text.", aliases: "s",
-        fn: (risp) => exports.getTalker(risp.guildId)?.skipText()
+        fn: (risp) => (0, exports.getTalker)(risp.guildId)?.skipText()
     },
     "sa, ss, skipall": {
         name: "skipall", category: "Talk", description: "Skips the current text.", aliases: "sa, ss",
-        fn: (risp) => exports.getTalker(risp.guildId)?.skipAll()
+        fn: (risp) => (0, exports.getTalker)(risp.guildId)?.skipAll()
     },
     "langs, languages": {
         name: "languages", category: "Talk", description: "Shows the list of all the possible languages.", aliases: "langs",
@@ -137,14 +137,14 @@ const logicHandler = {
     "voice": {
         name: "voice", category: "Talk", description: "Changes the voice used for the TTS.",
         fn: (risp, args) => {
-            const voice = UtilityFunctions_1.capitalizeFirstLetter(args[0]?.toLowerCase());
+            const voice = (0, UtilityFunctions_1.capitalizeFirstLetter)(args[0]?.toLowerCase());
             return setLanguage(Talker_1.Talker.supportedVoices[voice], voice, Talker_1.LANGUAGE_TYPE.freetts, risp);
         }
     },
     "ibm": {
         name: "ibm", category: "Talk", description: "Changes the voice used for the TTS.",
         fn: (risp, args) => {
-            const voice = UtilityFunctions_1.capitalizeFirstLetter(args[0]?.toLowerCase());
+            const voice = (0, UtilityFunctions_1.capitalizeFirstLetter)(args[0]?.toLowerCase());
             return setLanguage(Talker_1.Talker.supportedIbmVoices[voice], voice, Talker_1.LANGUAGE_TYPE.ibm, risp);
         }
     },
@@ -168,7 +168,7 @@ const logicHandler = {
     "delete": {
         name: "delete", category: "Talk", description: "Sets wether or not the bot will delete the messages after reading them.", aliases: "lang",
         fn: (risp, args) => {
-            const talker = exports.getTalker(risp.guildId); //Ricavo oggetto associato al server
+            const talker = (0, exports.getTalker)(risp.guildId); //Ricavo oggetto associato al server
             if (!talker)
                 return;
             const input = args[0].toLowerCase();
@@ -225,5 +225,5 @@ for (const { name, category } of Object.values(logicHandler)) {
 }
 const parseFields = (array) => `\`${array.map(e => `(${e[1].language.substring(0, 2)}) ${e[0]}`).join("\n")}\``;
 // const parseFieldsIbm = (array): string => `\`${array.map(e => `(${e[1].language}) ${e[0]}`).join("\n")}\``;
-applyAlias_1.applyAlias(logicHandler);
+(0, applyAlias_1.applyAlias)(logicHandler);
 //# sourceMappingURL=LogicHandler.js.map

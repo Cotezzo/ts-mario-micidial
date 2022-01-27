@@ -402,7 +402,6 @@ export declare class Talker {
     private player;
     private resource;
     constructor();
-    private shiftIfEmpty;
     addText: (risp: Message | CommandInteraction | ButtonInteraction, text: string) => Promise<void>;
     tryToPlay: (risp?: Message | CommandInteraction | ButtonInteraction) => Promise<any> | void;
     skipText: () => void;

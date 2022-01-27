@@ -191,14 +191,10 @@ export class Talker {
         this.player.on("error", (e) => logger.error("AudioPlayer error: " + e.message));
         this.player.on(AudioPlayerStatus.Idle, async () => {
             logger.info("FINISHED PLAYING SOMETHING");
-            this.shiftIfEmpty();
             this.speak();
         });
-
         logger.info("New instance created and listening on AudioPlayer events");
     }
-
-    private shiftIfEmpty = (): void => { if(this.textQueue[0] === "") this.textQueue.shift(); }
 
     public addText = async (risp: Message | CommandInteraction | ButtonInteraction, text: string) => {
         logger.info("Input: " + text);
@@ -274,10 +270,9 @@ export class Talker {
     public speak = async () => {
         if (!this.textQueue.length) return;                      //Se non esiste il testo, chiudo la funzione e metto il flag di riproduzione a false
 
-        logger.info(`TEXT: "${this.textQueue[0]}"`);
         logger.info(`QUEUE: [${this.textQueue.join(", ")}]`);
         if(this.textQueue[0] === "") {
-            logger.warn("Found empty string!");
+            logger.warn("Removing empty string...");
             this.textQueue.shift();
             return this.speak();
         }
@@ -336,7 +331,7 @@ export class Talker {
             
             if(stream) this.resource = createAudioResource(stream as any, { inlineVolume: true, inputType: StreamType.Arbitrary });
         } catch (e) {
-            this.shiftIfEmpty();
+            this.textQueue.shift();
             logger.error("Stream creation error: " + e);
             return this.speak();
         }
