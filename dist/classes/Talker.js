@@ -188,6 +188,7 @@ class Talker {
         this.player.on("stateChange", (_, newState) => logger.info("AudioPlayer state changed to " + newState.status));
         this.player.on("error", (e) => logger.error("AudioPlayer error: " + e.message));
         this.player.on(voice_1.AudioPlayerStatus.Idle, async () => {
+            logger.info("FINISHED PLAYING SOMETHING");
             this.shiftIfEmpty();
             this.speak();
         });
