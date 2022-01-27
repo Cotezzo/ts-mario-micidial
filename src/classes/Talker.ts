@@ -258,7 +258,7 @@ export class Talker {
     }
 
     public skipText = () => {
-        if(this.textQueue[0]) this.textQueue[0] = "";
+        this.textQueue.shift();
         this.player.stop();
     }
     
@@ -280,14 +280,10 @@ export class Talker {
         try {
             // Get stream
             let text: string, stream: any;
-
-
+            
             if(this.languageType === LANGUAGE_TYPE.google) {
                 text = this.textQueue[0].substring(0, 200);
                 this.textQueue[0] = this.textQueue[0].substring(200);
-
-                logger.warn(text);
-                logger.warn(this.textQueue[0])
 
                 const audioURL = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text.toLowerCase())}&tl=${this.language}&client=tw-ob&ttsspeed=${this.ttsSpeed}`;
                 stream = await axios.get(audioURL, { responseType: 'stream' }).then(resp => resp.data);
