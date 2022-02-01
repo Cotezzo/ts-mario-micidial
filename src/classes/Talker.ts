@@ -222,7 +222,7 @@ export class Talker {
        }
 
         // If the connection is in idle (the connection exists but is not playing), play - else connect, if the connection is successfull, play.
-        if (this.connection && this.player?.state.status === "idle") return this.speak();
+        if (this.connection && this.player?.state.status === "idle" || this.player?.state.status === "autopaused") return this.speak();
 
         // If the connection is up return - else, instance new connection and play
         if (this.connection && this.connection.state.status != "destroyed") return;
