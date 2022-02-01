@@ -306,7 +306,7 @@ class Talker {
         this.player?.stop();
         this.connection?.disconnect();
         this.textQueue = [];
-        this.player = (0, voice_1.createAudioPlayer)();
+        // this.player = createAudioPlayer();
         this.connection = undefined;
         this.volume = 1;
         this.resource = undefined;

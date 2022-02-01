@@ -352,7 +352,7 @@ export class Talker {
 
         this.textQueue = [];
 
-        this.player = createAudioPlayer();
+        // this.player = createAudioPlayer();
         this.connection = undefined;
 
         this.volume = 1;
