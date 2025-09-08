@@ -2,15 +2,12 @@
 import { ButtonInteraction, CommandInteraction, CommandInteractionOptionResolver, GuildMember, Message, StageChannel, VoiceChannel } from "discord.js";
 import { AudioPlayer, AudioPlayerStatus, AudioResource, createAudioPlayer, createAudioResource, DiscordGatewayAdapterCreator, entersState, getVoiceConnection, joinVoiceChannel, StreamType, VoiceConnection, VoiceConnectionDisconnectReason, VoiceConnectionStatus } from "@discordjs/voice";
 
-import { ClassLogger } from "./Logger";
-
 import { promisify } from "util";
 import axios from "axios";
 const wait = promisify(setTimeout);
 
 import { v4 } from "uuid";
-
-const logger: ClassLogger = new ClassLogger("Talker");
+import Logger from "./logging/Logger";
 
 const ibmHeaders = { "cookie": "tts-demo=s%3A6OQEZy9xbWIlSU3DC5KaNGqvWMrrQlYC.kiboEHFQ0cqTmTmsrrBo3AhL3%2B9zSW4tQGj4Zhl00Z0;" };
 
@@ -40,7 +37,7 @@ export class Talker {
     // REMOVED: am, az, hy, eu, be, ceb, co, fy, ka, gl, ht, ha, haw, iw, hmn, ig, ga, kk, rw, ky, lo, lt, lb
     // mg, mt, mi, mn, ny, or, ps, fa, pa, sm, gd, st, sn, sd, sr, sl, so, tg, tt, tk, xh, yi, yo, ug, uz, zu
 
-    public static supportedVoices = {
+    public static supportedVoices: { [k:string]: {language: string, value: string} } = {
         "Salli": { value: "Salli_Female", language: "en-US" },
         "Joanna": { value: "Joanna_Male", language: "en-US" },
         "Matthew": { value: "Matthew_Male", language: "en-US" },
@@ -103,7 +100,7 @@ export class Talker {
         "Gwyneth": { value: "Gwyneth_Female", language: "cy-GB" }
     };
 
-    public static supportedIbmVoices = {
+    public static supportedIbmVoices: { [k:string]: {language: string, voice: string} } = {
         Omar: { language: "ar", voice: "ar-AR_OmarVoice" },
     
         Wang: { language: "zh", voice: "zh-CN_WangWeiVoice" },
@@ -171,10 +168,10 @@ export class Talker {
     public deleteMessages: boolean;     // false
 
     /* ==== Audio ================================ */
-    public voiceChannel: VoiceChannel | StageChannel;                  // The current voiceChannel the bot is in
-    private connection: VoiceConnection;                                // Voice connection events handler
+    public voiceChannel: undefined | VoiceChannel | StageChannel;                  // The current voiceChannel the bot is in
+    private connection: undefined | VoiceConnection;                                // Voice connection events handler
     private player: AudioPlayer;                                        // Music player
-    private resource: AudioResource<null>;                              // Resource - stream that is being played
+    private resource: undefined | AudioResource<null>;                              // Resource - stream that is being played
 
     /* ==== Functions ============================ */
     public constructor() {
@@ -187,24 +184,28 @@ export class Talker {
         
         this.player = createAudioPlayer();                              // Brand new AudioPlayer
 
-        this.player.on("stateChange", (_, newState) => logger.info("AudioPlayer state changed to " + newState.status));
-        this.player.on("error", (e) => logger.error("AudioPlayer error: " + e.message));
+        this.player.on("stateChange", (_, newState) => Logger.info("AudioPlayer state changed to " + newState.status));
+        this.player.on("error", (e) => Logger.error("AudioPlayer error: " + e.message));
         this.player.on(AudioPlayerStatus.Idle, async () => {
-            logger.info("FINISHED PLAYING SOMETHING");
+            Logger.info("FINISHED PLAYING SOMETHING");
             this.speak();
         });
-        logger.info("New instance created and listening on AudioPlayer events");
+        Logger.info("New instance created and listening on AudioPlayer events");
     }
 
     public addText = async (risp: Message | CommandInteraction | ButtonInteraction, text: string) => {
-        logger.info("Input: " + text);
-        if (!text) return;                                                              // Se non c'è effettivamente roba da aggiungere, torna
+        Logger.info("Input: " + text);
+        // Se non c'è effettivamente roba da aggiungere, torna
+        if (!text) return;
         this.textQueue.push(text);
         this.tryToPlay(risp);
     }
 
     public tryToPlay = (risp?: Message | CommandInteraction | ButtonInteraction): Promise<any> | void => {
-        if (this.isPlaying()) return;
+        if (this.isPlaying()) {
+            Logger.warn("Bot already playing, returning");
+            return;
+        }
 
         // If risp is given, update properties
         if(risp){
@@ -217,7 +218,7 @@ export class Talker {
                 // Instance new connection
                 // TODO: capire se chiudere vecchie connessione
                 this.connection = joinVoiceChannel({ channelId: this.voiceChannel.id, guildId: this.voiceChannel.guildId, adapterCreator: (this.voiceChannel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator) });
-                logger.info("New connection enstablished");
+                Logger.info("New connection enstablished");
             }
        }
 
@@ -229,11 +230,11 @@ export class Talker {
 
 
         // Listeners
-        this.connection.on("error", () => logger.warn("Connection error"))
-        logger.info("Listening on connection event 'error'");
+        this.connection?.on("error", () => Logger.warn("Connection error"))
+        Logger.info("Listening on connection event 'error'");
 
-        this.connection.on("stateChange", async (_, newState) => {
-            logger.info("Connection state changed to " + newState.status);
+        this.connection?.on("stateChange", async (_, newState) => {
+            Logger.info("Connection state changed to " + newState.status);
             // Handle disconnection
             if (newState.status === VoiceConnectionStatus.Disconnected) {
                 if (newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014) {
@@ -241,18 +242,18 @@ export class Talker {
                         itself if the reason of the disconnect was due to switching voice channels. This is also the same code for the bot being kicked from the voice channel,
                         so we allow 5 seconds to figure out which scenario it is. If the bot has been kicked, we should destroy the voice connection.                           */
                     try {
-                        await entersState(this.connection, VoiceConnectionStatus.Connecting, 5_000);    // Probably moved voice channel
+                        await entersState(this.connection!, VoiceConnectionStatus.Connecting, 5_000);    // Probably moved voice channel
                     } catch {
-                        this.connection.destroy();                                                      // Probably removed from voice channel
+                        this.connection!.destroy();                                                      // Probably removed from voice channel
                     }
-                } else if (this.connection.rejoinAttempts < 5) {    		                            // Disconnect is recoverable, and we have <5 repeated attempts so we will reconnect.
-                    await wait((this.connection.rejoinAttempts + 1) * 5_000);
-                    this.connection.rejoin();
-                } else this.connection.destroy();                                                       // Disconnect may be recoverable, but we have no more remaining attempts - destroy.			
-            } else if (newState.status === VoiceConnectionStatus.Destroyed) logger.warn("Connection destroyed");   // Once destroyed, stop the subscription
+                } else if (this.connection!.rejoinAttempts < 5) {    		                            // Disconnect is recoverable, and we have <5 repeated attempts so we will reconnect.
+                    await wait((this.connection!.rejoinAttempts + 1) * 5_000);
+                    this.connection!.rejoin();
+                } else this.connection!.destroy();                                                       // Disconnect may be recoverable, but we have no more remaining attempts - destroy.			
+            } else if (newState.status === VoiceConnectionStatus.Destroyed) Logger.warn("Connection destroyed");   // Once destroyed, stop the subscription
         });
 
-        logger.info("Listening on connection event 'stateChange'");
+        Logger.info("Listening on connection event 'stateChange'");
 
         return this.speak();
     }
@@ -267,12 +268,14 @@ export class Talker {
         this.player.stop();
     }
 
-    public speak = async () => {
+    public speak = async (): Promise<any> => {
         if (!this.textQueue.length) return;                      //Se non esiste il testo, chiudo la funzione e metto il flag di riproduzione a false
 
-        logger.info(`QUEUE: [${this.textQueue.join(", ")}]`);
+        if(!this.voiceChannel) return;
+
+        Logger.info(`QUEUE: [${this.textQueue.join(", ")}]`);
         if(this.textQueue[0].length === 0) {
-            logger.warn("Removing empty string...");
+            Logger.warn("Removing empty string...");
             this.textQueue.shift();
             return this.speak();
         }
@@ -294,7 +297,7 @@ export class Talker {
                 this.textQueue[0] = "";
 
                 const voice = Talker.supportedVoices[this.language];
-                logger.time("IVONA generation time");
+                console.time("IVONA generation time");
 
                 stream = await axios.get(`https://nextup.com/ivona/php/nextup-polly/CreateSpeech/CreateSpeechGet3.php?voice=${this.language}&language=${voice.language}&text=${encodeURIComponent(text)}`)
                 .then((r: any) => axios.get(r.data, { responseType: 'stream' }))
@@ -307,14 +310,14 @@ export class Talker {
                 .then(resp => resp.data);
                 */
 
-                logger.timeEnd("IVONA generation time");
+                console.timeEnd("IVONA generation time");
                 
             } else if(this.languageType === LANGUAGE_TYPE.ibm) {
                 text = this.textQueue[0];
                 this.textQueue[0] = "";
 
                 const voice = Talker.supportedIbmVoices[this.language];
-                logger.time("IBM generation time");
+                console.time("IBM generation time");
 
                 const sessionID = v4();
                 stream = await axios.post("https://www.ibm.com/demos/live/tts-demo/api/tts/store",
@@ -325,25 +328,29 @@ export class Talker {
                     { "headers": ibmHeaders, responseType: "stream" }))
                 .then(r => r.data);
 
-                logger.timeEnd("IBM generation time");
+                console.timeEnd("IBM generation time");
             }
             
             if(stream) this.resource = createAudioResource(stream as any, { inlineVolume: true, inputType: StreamType.Arbitrary });
+            else {
+                Logger.error("Could not create resource");
+                return;
+            }
         } catch (e) {
             this.textQueue.shift();
-            logger.error("Stream creation error: " + e);
+            Logger.error("Stream creation error: " + e);
             return this.speak();
         }
 
         this.setVolume();                                           // Set the volume of the new stream
         this.player.play(this.resource);                            // Actually start the new stream/resource on the player
         this.connection = getVoiceConnection(this.voiceChannel.guildId);
-        this.connection.subscribe(this.player);                     // Apply the player to the connection (??)
+        this.connection?.subscribe(this.player);                     // Apply the player to the connection (??)
     }
 
     public setVolume = (volume: number = this.volume) => {
         this.volume = volume;                           // Set new volume value
-        this.resource?.volume.setVolume(this.volume);   // If there's a resource, apply the volume
+        this.resource?.volume?.setVolume(this.volume);   // If there's a resource, apply the volume
     }
 
     public reset = () => {
@@ -363,9 +370,33 @@ export class Talker {
 
     private isPlaying = (): boolean => this.player.state.status === "playing";
 
-    private checkVoice = (risp: Message | CommandInteraction | ButtonInteraction): Talker => {
+    private checkVoice = (risp: Message | CommandInteraction | ButtonInteraction): undefined | Talker => {
         if (!(risp.member instanceof GuildMember)) return;
         const vc = risp.member.voice?.channel;
         if (vc && (!this.voiceChannel || this.voiceChannel.id == vc.id)) return this;
     }
+}
+
+
+
+/* ==== Music Logic ========================================================= */
+interface TalkersMap<Talker> { [serverId: string]: Talker; }
+const talkerMap: TalkersMap<Talker> = {};
+
+export const getTalker = (guildId: string): Talker => talkerMap[guildId];
+
+export const getOrCreateTalker = (guildId: string): Talker => {
+    if(!talkerMap[guildId]) talkerMap[guildId] = new Talker();
+    return talkerMap[guildId];
+}
+
+export const setLanguage = (input: string, type: number, guildId: string) => {
+    const talker: Talker = getOrCreateTalker(guildId);
+    talker.language = input;
+    talker.languageType = type;
+}
+
+export const deleteTalker = (guildId: string): void => {
+    delete talkerMap[guildId];
+    Logger.info(`RadioPlayer ${guildId} destroyed`);
 }

@@ -1,0 +1,30 @@
+# OBSOLETE: Docker Compose Version - specifies format and available features.
+# version: '3.8'
+
+#! docker-compose automatically loads environment variables from .env files
+
+
+## ==== SERVICES ============================================================ ##
+## Defines the services (containers) that make up the application.
+## Service names ar arbitrary and used for automatic container name generation.
+## Service names are used for DNS resolution inside the Docker private network.
+services:
+
+  # ==== NODE ================================================================ #
+  ts-mario-micidial:
+
+    # Custom container name and environment variables.
+    container_name: ts-mario-micidial
+    environment:
+      # Node & Discord configuration
+      NODE_ENV: dev
+      LOG_LEVEL: INFO
+      TOKEN: ${TOKEN}
+      PREFIX: +
+      VERSION: 3.0.0
+      EMBED_COLOR: 0xad1457
+
+    # Build image from Dockerfile in the current directory and override its CMD.
+    build: .
+    command: npm run start
+    image: ts-mario-micidial:latest

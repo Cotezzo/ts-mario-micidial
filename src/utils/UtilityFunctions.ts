@@ -1,6 +1,6 @@
 export const capitalizeFirstLetter = (string: string): string => string?.charAt(0).toUpperCase() + string?.slice(1)
 
-export function sleep(ms) {
+export function sleep(ms: number) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
